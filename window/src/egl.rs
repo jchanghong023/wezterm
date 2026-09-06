@@ -569,7 +569,7 @@ impl GlState {
                 ffi::BLUE_SIZE,
                 8,
                 ffi::DEPTH_SIZE,
-                24,
+                16,
                 ffi::CONFORMANT,
                 if connection.is_opengl {
                     ffi::OPENGL_BIT
@@ -631,9 +631,26 @@ impl GlState {
                 &attributes,
             ) {
                 Ok(c) => c,
-                Err(e) => {
-                    errors.push_str(&format!("{:#} {:x?}\n", e, config));
-                    continue;
+                Err(_) => {
+                    // Older/virtualized drivers (notably llvmpipe-era Mesa
+                    // under WSLg/XWayland) reject some attribute combinations
+                    // for a 3.x context.  Fall back to a minimal context
+                    // request, which yields whatever highest version the
+                    // driver supports on this config.
+                    attributes.clear();
+                    attributes.push(ffi::NONE);
+                    match connection.egl.create_context(
+                        connection.display,
+                        config,
+                        std::ptr::null(),
+                        &attributes,
+                    ) {
+                        Ok(c) => c,
+                        Err(e) => {
+                            errors.push_str(&format!("{:#} {:x?}\n", e, config));
+                            continue;
+                        }
+                    }
                 }
             };
 

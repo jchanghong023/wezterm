@@ -557,8 +557,19 @@ impl FontConfigInner {
     }
 
     fn compute_title_font(&self, config: &ConfigHandle, make_bold: bool) -> (TextStyle, f64) {
-        let _ = make_bold;
-        let mut fonts = vec![FontAttributes::new("Roboto")];
+        fn bold(family: &str) -> FontAttributes {
+            FontAttributes {
+                family: family.to_string(),
+                weight: FontWeight::BOLD,
+                ..Default::default()
+            }
+        }
+
+        let mut fonts = vec![if make_bold {
+            bold("Roboto")
+        } else {
+            FontAttributes::new("Roboto")
+        }];
 
         // Fallback to their main font selection, so that we can pick up
         // any fallback fonts they might have configured in the main
@@ -587,7 +598,8 @@ impl FontConfigInner {
         entity: Entity,
     ) -> anyhow::Result<Rc<LoadedFont>> {
         let config = self.config.borrow();
-        let (sys_font, sys_size) = self.compute_title_font(&config, false);
+        let make_bold = entity != Entity::CommandPalette;
+        let (sys_font, sys_size) = self.compute_title_font(&config, make_bold);
 
         let (font_size, text_style) = match entity {
             Entity::Title => (config.window_frame.font_size.unwrap_or(sys_size), None),

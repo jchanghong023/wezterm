@@ -176,7 +176,7 @@ impl ColorPalette {
         let selection_bg = RgbColor::new_8bpc(0x35, 0x46, 0x60).into();
 
         let scrollbar_thumb = RgbColor::new_8bpc(0x46, 0x4b, 0x55).into();
-        let split = RgbColor::new_8bpc(0x3b, 0x3f, 0x48).into();
+        let split = RgbColor::new_8bpc(0x4a, 0x50, 0x5a).into();
 
         ColorPalette {
             colors: Palette256(colors),

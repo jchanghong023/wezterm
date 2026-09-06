@@ -68,6 +68,7 @@ use wezterm_font::FontConfiguration;
 use wezterm_term::color::ColorPalette;
 use wezterm_term::input::LastMouseClick;
 use wezterm_term::{Alert, Progress, StableRowIndex, TerminalConfiguration, TerminalSize};
+use wezterm_toast_notification::ToastNotification;
 
 pub mod background;
 pub mod box_model;
@@ -2685,8 +2686,15 @@ impl TermWindow {
             }
             SplitVertical(_) => {
                 // This build only supports the left/right dual-pane layout;
-                // top/bottom splits are disabled.
+                // tell the user instead of silently ignoring the request.
                 log::trace!("SplitVertical disabled in this build");
+                ToastNotification {
+                    title: "分屏".to_string(),
+                    message: "本版本仅支持左右分屏".to_string(),
+                    url: None,
+                    timeout: Some(Duration::from_secs(2)),
+                }
+                .show();
             }
             ToggleFullScreen => {
                 self.window.as_ref().unwrap().toggle_fullscreen();

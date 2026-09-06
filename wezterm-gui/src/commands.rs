@@ -1470,9 +1470,9 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             domain: SpawnTabDomain::CurrentPaneDomain,
             ..
         }) => CommandDef {
-            brief: label_string(action, "Split Horizontally (Left/Right)".to_string()).into(),
-            doc: "Split the current pane horizontally into two panes, by spawning \
-            the default program into the right hand side"
+            brief: label_string(action, "Toggle Single/Dual Pane (Left/Right)".to_string()).into(),
+            doc: "First press splits the current pane left/right; with two panes, \
+            toggles pane zoom instead. This build is limited to two panes per tab"
                 .into(),
             keys: vec![(
                 Modifiers::CTRL
@@ -1485,9 +1485,9 @@ pub fn derive_command_from_key_assignment(action: &KeyAssignment) -> Option<Comm
             icon: Some("cod_split_horizontal"),
         },
         SplitHorizontal(_) => CommandDef {
-            brief: label_string(action, "Split Horizontally (Left/Right)".to_string()).into(),
-            doc: "Split the current pane horizontally into two panes, by spawning \
-            the default program into the right hand side"
+            brief: label_string(action, "Toggle Single/Dual Pane (Left/Right)".to_string()).into(),
+            doc: "First press splits the current pane left/right; with two panes, \
+            toggles pane zoom instead. This build is limited to two panes per tab"
                 .into(),
             keys: vec![],
             args: &[ArgType::ActivePane],
@@ -2028,10 +2028,6 @@ fn compute_default_actions() -> Vec<KeyAssignment> {
         // ----------------- Shell
         SpawnTab(SpawnTabDomain::CurrentPaneDomain),
         SpawnWindow,
-        SplitVertical(SpawnCommand {
-            domain: SpawnTabDomain::CurrentPaneDomain,
-            ..Default::default()
-        }),
         SplitHorizontal(SpawnCommand {
             domain: SpawnTabDomain::CurrentPaneDomain,
             ..Default::default()

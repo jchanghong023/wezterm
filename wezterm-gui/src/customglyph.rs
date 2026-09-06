@@ -2,7 +2,7 @@ use crate::glyphcache::{GlyphCache, SizedBlockKey};
 use crate::utilsprites::RenderMetrics;
 use ::window::bitmaps::atlas::Sprite;
 use ::window::color::SrgbaPixel;
-use config::DimensionContext;
+use config::{Dimension, DimensionContext};
 use std::ops::Range;
 use termwiz::surface::CursorShape;
 use tiny_skia::{BlendMode, FillRule, Paint, Path, PathBuilder, PixmapMut, Stroke, Transform};
@@ -5059,21 +5059,25 @@ impl GlyphCache {
         }
 
         let mut metrics = metrics.scale_cell_width(width as f64);
-        // Only the thin vertical bar cursor honors cursor_thickness; block
-        // and underline shapes keep their normal scaled geometry so that a
-        // global 2px default (this build) doesn't fatten app-requested
-        // block cursors or change underline rendering.
+        // An explicit cursor_thickness honors the user's choice for every
+        // cursor shape (upstream semantics).  Without one, only the thin
+        // vertical bar falls back to 2px; block and underline shapes keep
+        // their normal scaled geometry.
         if let Some(d) = &self.fonts.config().cursor_thickness {
-            if matches!(
-                shape,
-                Some(CursorShape::BlinkingBar | CursorShape::SteadyBar)
-            ) {
-                metrics.underline_height = d.evaluate_as_pixels(DimensionContext {
-                    dpi: self.fonts.get_dpi() as f32,
-                    pixel_max: metrics.underline_height as f32,
-                    pixel_cell: metrics.cell_size.height as f32,
-                }) as isize;
-            }
+            metrics.underline_height = d.evaluate_as_pixels(DimensionContext {
+                dpi: self.fonts.get_dpi() as f32,
+                pixel_max: metrics.underline_height as f32,
+                pixel_cell: metrics.cell_size.height as f32,
+            }) as isize;
+        } else if matches!(
+            shape,
+            Some(CursorShape::BlinkingBar | CursorShape::SteadyBar)
+        ) {
+            metrics.underline_height = Dimension::Pixels(2.).evaluate_as_pixels(DimensionContext {
+                dpi: self.fonts.get_dpi() as f32,
+                pixel_max: metrics.underline_height as f32,
+                pixel_cell: metrics.cell_size.height as f32,
+            }) as isize;
         }
 
         let mut buffer = Image::new(

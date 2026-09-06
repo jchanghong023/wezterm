@@ -507,7 +507,7 @@ fn default_inactive_tab_hover() -> TabBarColor {
 }
 fn default_active_tab() -> TabBarColor {
     TabBarColor {
-        bg_color: (0x28, 0x2a, 0x2f).into(),
+        bg_color: (0x34, 0x37, 0x3d).into(),
         fg_color: (0xf1, 0xf3, 0xf5).into(),
         ..TabBarColor::default()
     }

@@ -63,7 +63,7 @@ pub struct Config {
     #[dynamic(default = "default_one_point_oh_f64")]
     pub cell_width: f64,
 
-    #[dynamic(try_from = "crate::units::OptPixelUnit", default = "default_two_pixels")]
+    #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
     pub cursor_thickness: Option<Dimension>,
 
     #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
@@ -1937,9 +1937,6 @@ const fn linear_ease() -> EasingFunction {
     EasingFunction::Linear
 }
 
-fn default_two_pixels() -> Option<Dimension> {
-    Some(Dimension::Pixels(2.))
-}
 
 const fn default_half_cell() -> Dimension {
     Dimension::Cells(0.5)

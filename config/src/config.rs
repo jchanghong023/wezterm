@@ -63,7 +63,7 @@ pub struct Config {
     #[dynamic(default = "default_one_point_oh_f64")]
     pub cell_width: f64,
 
-    #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
+    #[dynamic(try_from = "crate::units::OptPixelUnit", default = "default_two_pixels")]
     pub cursor_thickness: Option<Dimension>,
 
     #[dynamic(try_from = "crate::units::OptPixelUnit", default)]
@@ -1685,7 +1685,7 @@ fn default_ratelimit_line_prefetches_per_second() -> u32 {
 }
 
 fn default_cursor_blink_rate() -> u64 {
-    800
+    0
 }
 
 fn default_text_blink_rate() -> u64 {
@@ -1901,8 +1901,8 @@ fn default_clean_exits() -> Vec<u32> {
 
 fn default_inactive_pane_hsb() -> HsbTransform {
     HsbTransform {
-        brightness: 0.8,
-        saturation: 0.9,
+        brightness: 1.0,
+        saturation: 1.0,
         hue: 1.0,
     }
 }
@@ -1910,14 +1910,13 @@ fn default_inactive_pane_hsb() -> HsbTransform {
 #[derive(FromDynamic, ToDynamic, Clone, Copy, Debug, Default)]
 pub enum DefaultCursorStyle {
     BlinkingBlock,
-    #[default]
     SteadyBlock,
     BlinkingUnderline,
     SteadyUnderline,
     BlinkingBar,
+    #[default]
     SteadyBar,
 }
-
 impl DefaultCursorStyle {
     pub fn effective_shape(self, shape: CursorShape) -> CursorShape {
         match shape {
@@ -1938,8 +1937,8 @@ const fn linear_ease() -> EasingFunction {
     EasingFunction::Linear
 }
 
-const fn default_one_cell() -> Dimension {
-    Dimension::Cells(1.)
+fn default_two_pixels() -> Option<Dimension> {
+    Some(Dimension::Pixels(2.))
 }
 
 const fn default_half_cell() -> Dimension {
@@ -1952,25 +1951,33 @@ const fn default_reverse_video_cursor_min_contrast() -> f32 {
 
 #[derive(FromDynamic, ToDynamic, Clone, Copy, Debug)]
 pub struct WindowPadding {
-    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_one_cell")]
+    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_twelve_pixels")]
     pub left: Dimension,
-    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_half_cell")]
+    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_eight_pixels")]
     pub top: Dimension,
-    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_one_cell")]
+    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_twelve_pixels")]
     pub right: Dimension,
-    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_half_cell")]
+    #[dynamic(try_from = "crate::units::PixelUnit", default = "default_eight_pixels")]
     pub bottom: Dimension,
 }
 
 impl Default for WindowPadding {
     fn default() -> Self {
         Self {
-            left: default_one_cell(),
-            right: default_one_cell(),
-            top: default_half_cell(),
-            bottom: default_half_cell(),
+            left: default_twelve_pixels(),
+            right: default_twelve_pixels(),
+            top: default_eight_pixels(),
+            bottom: default_eight_pixels(),
         }
     }
+}
+
+const fn default_twelve_pixels() -> Dimension {
+    Dimension::Pixels(12.)
+}
+
+const fn default_eight_pixels() -> Dimension {
+    Dimension::Pixels(8.)
 }
 
 #[derive(FromDynamic, ToDynamic, Clone, Copy, Debug, Default)]

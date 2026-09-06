@@ -480,36 +480,35 @@ impl TryFrom<String> for IntegratedTitleButtonColor {
 }
 
 fn default_background() -> RgbaColor {
-    (0x33, 0x33, 0x33).into()
+    (0x18, 0x19, 0x1c).into()
 }
 
 fn default_inactive_tab_edge() -> RgbaColor {
-    RgbColor::new_8bpc(0x57, 0x57, 0x57).into()
+    RgbColor::new_8bpc(0x30, 0x33, 0x3a).into()
 }
 
 fn default_inactive_tab_edge_hover() -> RgbaColor {
-    RgbColor::new_8bpc(0x36, 0x36, 0x36).into()
+    RgbColor::new_8bpc(0x30, 0x33, 0x3a).into()
 }
 
 fn default_inactive_tab() -> TabBarColor {
     TabBarColor {
-        bg_color: (0x33, 0x33, 0x33).into(),
-        fg_color: (0x80, 0x80, 0x80).into(),
+        bg_color: (0x18, 0x19, 0x1c).into(),
+        fg_color: (0xa5, 0xaa, 0xb5).into(),
         ..TabBarColor::default()
     }
 }
 fn default_inactive_tab_hover() -> TabBarColor {
     TabBarColor {
-        bg_color: (0x1f, 0x1f, 0x1f).into(),
-        fg_color: (0x90, 0x90, 0x90).into(),
-        italic: true,
+        bg_color: (0x22, 0x24, 0x29).into(),
+        fg_color: (0xda, 0xdd, 0xe3).into(),
         ..TabBarColor::default()
     }
 }
 fn default_active_tab() -> TabBarColor {
     TabBarColor {
-        bg_color: (0x00, 0x00, 0x00).into(),
-        fg_color: (0xc0, 0xc0, 0xc0).into(),
+        bg_color: (0x28, 0x2a, 0x2f).into(),
+        fg_color: (0xf1, 0xf3, 0xf5).into(),
         ..TabBarColor::default()
     }
 }
@@ -640,43 +639,43 @@ impl Default for WindowFrameConfig {
 }
 
 fn default_inactive_titlebar_bg() -> RgbaColor {
-    RgbColor::new_8bpc(0x33, 0x33, 0x33).into()
+    RgbColor::new_8bpc(0x18, 0x19, 0x1c).into()
 }
 
 fn default_active_titlebar_bg() -> RgbaColor {
-    RgbColor::new_8bpc(0x33, 0x33, 0x33).into()
+    RgbColor::new_8bpc(0x18, 0x19, 0x1c).into()
 }
 
 fn default_inactive_titlebar_fg() -> RgbaColor {
-    RgbColor::new_8bpc(0xcc, 0xcc, 0xcc).into()
+    RgbColor::new_8bpc(0xa5, 0xaa, 0xb5).into()
 }
 
 fn default_active_titlebar_fg() -> RgbaColor {
-    RgbColor::new_8bpc(0xff, 0xff, 0xff).into()
+    RgbColor::new_8bpc(0xf1, 0xf3, 0xf5).into()
 }
 
 fn default_inactive_titlebar_border_bottom() -> RgbaColor {
-    RgbColor::new_8bpc(0x2b, 0x20, 0x42).into()
+    RgbColor::new_8bpc(0x30, 0x33, 0x3a).into()
 }
 
 fn default_active_titlebar_border_bottom() -> RgbaColor {
-    RgbColor::new_8bpc(0x2b, 0x20, 0x42).into()
+    RgbColor::new_8bpc(0x30, 0x33, 0x3a).into()
 }
 
 fn default_button_hover_fg() -> RgbaColor {
-    RgbColor::new_8bpc(0xff, 0xff, 0xff).into()
+    RgbColor::new_8bpc(0xda, 0xdd, 0xe3).into()
 }
 
 fn default_button_fg() -> RgbaColor {
-    RgbColor::new_8bpc(0xcc, 0xcc, 0xcc).into()
+    RgbColor::new_8bpc(0xa5, 0xaa, 0xb5).into()
 }
 
 fn default_button_hover_bg() -> RgbaColor {
-    RgbColor::new_8bpc(0x1f, 0x1f, 0x1f).into()
+    RgbColor::new_8bpc(0x22, 0x24, 0x29).into()
 }
 
 fn default_button_bg() -> RgbaColor {
-    RgbColor::new_8bpc(0x33, 0x33, 0x33).into()
+    RgbColor::new_8bpc(0x18, 0x19, 0x1c).into()
 }
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, FromDynamic, ToDynamic)]

@@ -103,39 +103,40 @@ impl ColorPalette {
         let mut colors = [SrgbaTuple::default(); 256];
 
         // The XTerm ansi color set
+        // Custom neutral dark-gray ANSI set (spec: keep red=red, green=green mapping)
         let ansi: [SrgbaTuple; 16] = [
             // Black
-            RgbColor::new_8bpc(0x00, 0x00, 0x00).into(),
+            RgbColor::new_8bpc(0x17, 0x18, 0x1b).into(),
             // Maroon
-            RgbColor::new_8bpc(0xcc, 0x55, 0x55).into(),
+            RgbColor::new_8bpc(0xe5, 0x8a, 0x8a).into(),
             // Green
-            RgbColor::new_8bpc(0x55, 0xcc, 0x55).into(),
+            RgbColor::new_8bpc(0xa5, 0xc9, 0x8b).into(),
             // Olive
-            RgbColor::new_8bpc(0xcd, 0xcd, 0x55).into(),
+            RgbColor::new_8bpc(0xe4, 0xc3, 0x8a).into(),
             // Navy
-            RgbColor::new_8bpc(0x54, 0x55, 0xcb).into(),
+            RgbColor::new_8bpc(0x8a, 0xb4, 0xf8).into(),
             // Purple
-            RgbColor::new_8bpc(0xcc, 0x55, 0xcc).into(),
+            RgbColor::new_8bpc(0xc5, 0xa3, 0xe6).into(),
             // Teal
-            RgbColor::new_8bpc(0x7a, 0xca, 0xca).into(),
+            RgbColor::new_8bpc(0x8d, 0xcb, 0xd3).into(),
             // Silver
-            RgbColor::new_8bpc(0xcc, 0xcc, 0xcc).into(),
+            RgbColor::new_8bpc(0xda, 0xdd, 0xe3).into(),
             // Grey
-            RgbColor::new_8bpc(0x55, 0x55, 0x55).into(),
+            RgbColor::new_8bpc(0x7c, 0x85, 0x94).into(),
             // Red
-            RgbColor::new_8bpc(0xff, 0x55, 0x55).into(),
+            RgbColor::new_8bpc(0xf2, 0xa3, 0xa3).into(),
             // Lime
-            RgbColor::new_8bpc(0x55, 0xff, 0x55).into(),
+            RgbColor::new_8bpc(0xb8, 0xdc, 0xa1).into(),
             // Yellow
-            RgbColor::new_8bpc(0xff, 0xff, 0x55).into(),
+            RgbColor::new_8bpc(0xf0, 0xd7, 0xa8).into(),
             // Blue
-            RgbColor::new_8bpc(0x55, 0x55, 0xff).into(),
+            RgbColor::new_8bpc(0xa4, 0xc7, 0xff).into(),
             // Fuchsia
-            RgbColor::new_8bpc(0xff, 0x55, 0xff).into(),
+            RgbColor::new_8bpc(0xd8, 0xb9, 0xf2).into(),
             // Aqua
-            RgbColor::new_8bpc(0x55, 0xff, 0xff).into(),
+            RgbColor::new_8bpc(0xa5, 0xde, 0xe5).into(),
             // White
-            RgbColor::new_8bpc(0xff, 0xff, 0xff).into(),
+            RgbColor::new_8bpc(0xf1, 0xf3, 0xf5).into(),
         ];
 
         colors[0..16].copy_from_slice(&ansi);
@@ -164,18 +165,18 @@ impl ColorPalette {
             colors[232 + idx] = RgbColor::new_8bpc(grey, grey, grey).into();
         }
 
-        let foreground = colors[249]; // Grey70
-        let background = colors[AnsiColor::Black as usize];
+        let foreground = RgbColor::new_8bpc(0xda, 0xdd, 0xe3).into();
+        let background = RgbColor::new_8bpc(0x1e, 0x1f, 0x22).into();
 
-        let cursor_bg = RgbColor::new_8bpc(0x52, 0xad, 0x70).into();
-        let cursor_border = RgbColor::new_8bpc(0x52, 0xad, 0x70).into();
-        let cursor_fg = colors[AnsiColor::Black as usize].into();
+        let cursor_bg = RgbColor::new_8bpc(0xcd, 0xd3, 0xdd).into();
+        let cursor_border = RgbColor::new_8bpc(0xcd, 0xd3, 0xdd).into();
+        let cursor_fg = RgbColor::new_8bpc(0x1e, 0x1f, 0x22).into();
 
-        let selection_fg = SrgbaTuple(0., 0., 0., 0.);
-        let selection_bg = SrgbaTuple(0.5, 0.4, 0.6, 0.5);
+        let selection_fg = RgbColor::new_8bpc(0xf1, 0xf3, 0xf5).into();
+        let selection_bg = RgbColor::new_8bpc(0x35, 0x46, 0x60).into();
 
-        let scrollbar_thumb = RgbColor::new_8bpc(0x22, 0x22, 0x22).into();
-        let split = RgbColor::new_8bpc(0x44, 0x44, 0x44).into();
+        let scrollbar_thumb = RgbColor::new_8bpc(0x46, 0x4b, 0x55).into();
+        let split = RgbColor::new_8bpc(0x3b, 0x3f, 0x48).into();
 
         ColorPalette {
             colors: Palette256(colors),

@@ -5059,12 +5059,21 @@ impl GlyphCache {
         }
 
         let mut metrics = metrics.scale_cell_width(width as f64);
+        // Only the thin vertical bar cursor honors cursor_thickness; block
+        // and underline shapes keep their normal scaled geometry so that a
+        // global 2px default (this build) doesn't fatten app-requested
+        // block cursors or change underline rendering.
         if let Some(d) = &self.fonts.config().cursor_thickness {
-            metrics.underline_height = d.evaluate_as_pixels(DimensionContext {
-                dpi: self.fonts.get_dpi() as f32,
-                pixel_max: metrics.underline_height as f32,
-                pixel_cell: metrics.cell_size.height as f32,
-            }) as isize;
+            if matches!(
+                shape,
+                Some(CursorShape::BlinkingBar | CursorShape::SteadyBar)
+            ) {
+                metrics.underline_height = d.evaluate_as_pixels(DimensionContext {
+                    dpi: self.fonts.get_dpi() as f32,
+                    pixel_max: metrics.underline_height as f32,
+                    pixel_cell: metrics.cell_size.height as f32,
+                }) as isize;
+            }
         }
 
         let mut buffer = Image::new(
@@ -5108,7 +5117,7 @@ impl GlyphCache {
                             PolyCommand::LineTo(BlockCoord::Zero, BlockCoord::One),
                         ],
                         intensity: BlockAlpha::Full,
-                        style: PolyStyle::OutlineHeavy,
+                        style: PolyStyle::Outline,
                     }],
                     &mut buffer,
                     PolyAA::AntiAlias,

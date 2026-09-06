@@ -2651,28 +2651,42 @@ impl TermWindow {
                 self.spawn_command(spawn, SpawnWhere::NewWindow);
             }
             SplitHorizontal(spawn) => {
+                // Custom build behavior for the default left/right split key
+                // (CTRL+ALT+SHIFT+%):
+                //  * one terminal  -> split, creating a second terminal on
+                //    the right at ~50% and focusing it
+                //  * two terminals  -> toggle the pane-zoom state: if the
+                //    focused terminal fills the tab, restore the two-column
+                //    layout; otherwise zoom the focused one full-tab
+                // No third terminal can ever be created: the mux layer
+                // rejects splits once a tab holds two panes.
                 log::trace!("SplitHorizontal {:?}", spawn);
-                self.spawn_command(
-                    spawn,
-                    SpawnWhere::SplitPane(SplitRequest {
-                        direction: SplitDirection::Horizontal,
-                        target_is_second: true,
-                        size: MuxSplitSize::Percent(50),
-                        top_level: false,
-                    }),
-                );
+                let mux = Mux::get();
+                let tab = match mux.get_active_tab_for_window(self.mux_window_id) {
+                    Some(tab) => tab,
+                    None => return Ok(PerformAssignmentResult::Handled),
+                };
+                let panes = tab.iter_panes_ignoring_zoom();
+                if panes.len() == 1 {
+                    self.spawn_command(
+                        spawn,
+                        SpawnWhere::SplitPane(SplitRequest {
+                            direction: SplitDirection::Horizontal,
+                            target_is_second: true,
+                            size: MuxSplitSize::Percent(50),
+                            top_level: false,
+                        }),
+                    );
+                } else {
+                    // Already at the two-pane limit: toggle zoom state
+                    // without creating or closing any terminal.
+                    tab.toggle_zoom();
+                }
             }
-            SplitVertical(spawn) => {
-                log::trace!("SplitVertical {:?}", spawn);
-                self.spawn_command(
-                    spawn,
-                    SpawnWhere::SplitPane(SplitRequest {
-                        direction: SplitDirection::Vertical,
-                        target_is_second: true,
-                        size: MuxSplitSize::Percent(50),
-                        top_level: false,
-                    }),
-                );
+            SplitVertical(_) => {
+                // This build only supports the left/right dual-pane layout;
+                // top/bottom splits are disabled.
+                log::trace!("SplitVertical disabled in this build");
             }
             ToggleFullScreen => {
                 self.window.as_ref().unwrap().toggle_fullscreen();

@@ -113,6 +113,11 @@ pub struct Mux {
     num_panes_by_workspace: RwLock<HashMap<String, usize>>,
     main_thread_id: std::thread::ThreadId,
     agent: Option<AgentProxy>,
+    /// Tabs that currently have an asynchronous split spawn in flight.
+    /// Used to reject rapid duplicate split requests (eg: repeated presses
+    /// of the split toggle) before the spawned pane is inserted, which
+    /// would otherwise race the two-pane limit.
+    splits_in_flight: RwLock<HashSet<TabId>>,
 }
 
 const BUFSIZE: usize = 1024 * 1024;
@@ -456,6 +461,7 @@ impl Mux {
             num_panes_by_workspace: RwLock::new(HashMap::new()),
             main_thread_id: std::thread::current().id(),
             agent,
+            splits_in_flight: RwLock::new(HashSet::new()),
         }
     }
 
@@ -1201,10 +1207,49 @@ impl Mux {
         source: SplitSource,
         domain: config::keyassignment::SpawnTabDomain,
     ) -> anyhow::Result<(Arc<dyn Pane>, TerminalSize)> {
+        // This fork enforces a hard limit of two panes per tab, arranged as
+        // a single left/right split.  All split entry points (GUI keys, lua
+        // mux:pane():split(), the mux server and the CLI) funnel through
+        // here, so we can block a third pane and top/bottom splits without
+        // disturbing the panes that already exist.
         let (_pane_domain_id, window_id, tab_id) = self
             .resolve_pane_id(pane_id)
             .ok_or_else(|| anyhow!("pane_id {} invalid", pane_id))?;
+        if request.direction != crate::tab::SplitDirection::Horizontal {
+            anyhow::bail!("this build only supports left/right splits");
+        }
+        if self.splits_in_flight.read().contains(&tab_id) {
+            // A split for this tab is still being spawned asynchronously;
+            // reject the duplicate so that rapid key presses can't create
+            // a third terminal.
+            anyhow::bail!("a split is already in progress for this tab");
+        }
+        let pane_count = self
+            .get_tab(tab_id)
+            .and_then(|tab| tab.count_panes())
+            .unwrap_or(usize::MAX);
+        if pane_count >= 2 {
+            anyhow::bail!("this build limits each tab to two panes");
+        }
+        self.splits_in_flight.write().insert(tab_id);
 
+        let result = self
+            .split_pane_inner(pane_id, window_id, tab_id, request, source, domain)
+            .await;
+
+        self.splits_in_flight.write().remove(&tab_id);
+        result
+    }
+
+    async fn split_pane_inner(
+        &self,
+        pane_id: PaneId,
+        window_id: WindowId,
+        tab_id: TabId,
+        request: SplitRequest,
+        source: SplitSource,
+        domain: config::keyassignment::SpawnTabDomain,
+    ) -> anyhow::Result<(Arc<dyn Pane>, TerminalSize)> {
         let domain = self
             .resolve_spawn_tab_domain(Some(pane_id), &domain)
             .context("resolve_spawn_tab_domain")?;

@@ -662,14 +662,22 @@ impl XConnection {
     }
 
     pub(crate) fn create_new() -> anyhow::Result<Rc<XConnection>> {
+        // Some legacy/enterprise X servers (e.g. old OpenText Exceed
+        // deployments) do not advertise the XKEYBOARD extension.
+        // XKB is preferred, but it must not be mandatory here: when XKB is
+        // listed as mandatory the xcb crate panics before we can report a
+        // normal startup error or choose a degraded keyboard path.
+        let mandatory_extensions: &[xcb::Extension] = &[];
+        let optional_extensions: &[xcb::Extension] = &[
+            xcb::Extension::Xkb,
+            xcb::Extension::Present,
+            xcb::Extension::RandR,
+            xcb::Extension::Render,
+            xcb::Extension::Dri2,
+        ];
         let (conn, screen_num) = xcb::Connection::connect_with_xlib_display_and_extensions(
-            &[xcb::Extension::Xkb],
-            &[
-                xcb::Extension::Present,
-                xcb::Extension::RandR,
-                xcb::Extension::Render,
-                xcb::Extension::Dri2,
-            ],
+            mandatory_extensions,
+            optional_extensions,
         )?;
         conn.set_event_queue_owner(xcb::EventQueueOwner::Xcb);
 
@@ -715,6 +723,7 @@ impl XConnection {
         let atom_net_supporting_wm_check = Self::intern_atom(&conn, "_NET_SUPPORTING_WM_CHECK")?;
         let atom_net_active_window = Self::intern_atom(&conn, "_NET_ACTIVE_WINDOW")?;
 
+        let has_xkb = conn.active_extensions().any(|e| e == xcb::Extension::Xkb);
         let has_randr = conn.active_extensions().any(|e| e == xcb::Extension::RandR);
 
         let screen = conn
@@ -755,7 +764,19 @@ impl XConnection {
             visual.green_mask(),
             visual.blue_mask()
         );
-        let (keyboard, kbd_ev) = Keyboard::new(&conn)?;
+        let (keyboard, kbd_ev) = if has_xkb {
+            Keyboard::new(&conn).context("initializing XKB keyboard")?
+        } else {
+            log::warn!(
+                "XKEYBOARD extension is not available; using basic keyboard fallback. \
+                 Keyboard layout switching, IME/dead-key state, modifier tracking \
+                 and LED status may be degraded."
+            );
+            (
+                Keyboard::new_default().context("initializing fallback keyboard without XKB")?,
+                0,
+            )
+        };
         let keyboard = KeyboardWithFallback::new(keyboard)?;
 
         let cursor_font_id = conn.generate_id();
